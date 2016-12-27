@@ -1,0 +1,6 @@
+---
+
+duo_unix_required:
+  - duo_unix_duo_ikey
+  - duo_unix_duo_skey
+  - duo_unix_duo_host
