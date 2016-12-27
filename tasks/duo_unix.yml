@@ -1,0 +1,30 @@
+---
+
+- name: check for variables
+  when: >
+    (vars[item] is not defined) or
+    ( vars[item] is defined and not vars[item] ) or
+    ( vars[item] is defined and vars[item]|length == 0 )
+  with_items: "{{ duo_unix_required }}"
+  fail:
+    msg: >
+      Required variables not defined or empty.
+
+- name: install duosecurity dependencies
+  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
+  with_items:
+    - duo_unix
+    - pam_duo
+    - openssh-server
+
+- name: set duo configuration
+  template: src=templates/pam_duo.conf.j2 dest=/etc/duo/pam_duo.conf owner=root group=root mode=0600
+
+- name: update pam.d configuration
+  template: src=templates/sshd.j2 dest=/etc/pam.d/sshd owner=root group=root mode=0644
+
+- name: Ensure that sshd is running
+  service: name=sshd state=started enabled=yes
+  notify:
+    - sshd restart
+  ignore_errors: pam_duo_role_debug

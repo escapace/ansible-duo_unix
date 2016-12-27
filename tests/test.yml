@@ -1,0 +1,15 @@
+- name: Bring up docker containers
+  hosts: localhost
+  roles:
+    - role: provision_docker
+      provision_docker_inventory_group: "{{ groups['test-images'] }}"
+
+- hosts: test-images
+  vars:
+    duo_unix_role_debug: true
+    duo_unix_duo_ikey: integration-key
+    duo_unix_duo_skey: secret-key
+    duo_unix_duo_host: api-xxxxxx.duosecurity.com
+    dup_unix_groups: integration
+  roles:
+  - role: epiloque.duo_unix
