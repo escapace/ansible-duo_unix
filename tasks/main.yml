@@ -1,4 +1,4 @@
 ---
 
-- include: duo_unix.yml
+- include_tasks: duo_unix.yml
   when: ansible_os_family == "RedHat"
