@@ -1,16 +1,3 @@
-<p align="right">
-    <a href="https://travis-ci.org/epiloque/ansible-duo_unix">
-        <img src="https://travis-ci.org/epiloque/ansible-duo_unix.svg?branch=master"
-             alt="build status">
-    </a>
-        <a href="https://galaxy.ansible.com/epiloque/duo_unix">
-        <img src="https://img.shields.io/badge/ansible--galaxy-duo_unix-blue.svg"
-             alt="ansible galaxy">
-    </a>
-</p>
-
-duo_unix role
-
 ## Role Variables
 
 Available variables are listed below, along with default values:
@@ -75,7 +62,3 @@ duo_unix_autopush: no
   roles:
     - epiloque.duo_unix
 ```
-
-## License
-
-BSD

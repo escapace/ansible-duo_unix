@@ -10,12 +10,30 @@
     msg: >
       Required variables not defined or empty.
 
-- name: install duosecurity dependencies
+- name: retrieving Duo Security gpg key
+  rpm_key: state=present key=https://duo.com/RPM-GPG-KEY-DUO
+
+- name: add packagecloud repository
+  template:
+    src: templates/duosecurity.repo.j2
+    dest: "/etc/yum.repos.d/duosecurity.repo"
+    mode: 0644
+    owner: root
+    group: root
+  register: duo_unix_repository
+
+- name: yum makecache
+  shell: yum -q -y makecache fast warn=no
+  when: duo_unix_repository | changed
+
+- name: install Duo Security dependencies
   action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
   with_items:
+    - ca-certificates
     - duo_unix
-    - pam_duo
     - openssh-server
+    - pygpgme
+    - yum-utils
 
 - name: set duo configuration
   template: src=templates/pam_duo.conf.j2 dest=/etc/duo/pam_duo.conf owner=root group=root mode=0600
@@ -27,4 +45,9 @@
   service: name=sshd state=started enabled=yes
   notify:
     - sshd restart
-  ignore_errors: pam_duo_role_debug
+  ignore_errors: True
+  register: duo_unix_check_sshd
+
+- name: failed to start sshd
+  fail: msg="failed to start sshd"
+  when: ((duo_unix_check_sshd|failed) and (duo_unix_role_debug|bool == false))
