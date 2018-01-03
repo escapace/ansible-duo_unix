@@ -2,4 +2,4 @@
 .molecule
 playbook.yml
 tests/roles/*
-!tests/roles/epiloque.duo_unix
+!tests/roles/escapace.duo_unix

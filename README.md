@@ -60,5 +60,5 @@ duo_unix_autopush: no
     duo_unix_duo_skey: secret-key
     duo_unix_duo_host: api-xxxxxx.duosecurity.com
   roles:
-    - epiloque.duo_unix
+    - escapace.duo_unix
 ```
