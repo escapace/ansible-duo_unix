@@ -12,4 +12,4 @@
     duo_unix_duo_host: api-xxxxxx.duosecurity.com
     dup_unix_groups: integration
   roles:
-  - role: epiloque.duo_unix
+  - role: escapace.duo_unix
