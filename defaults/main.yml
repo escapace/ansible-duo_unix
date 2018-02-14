@@ -20,7 +20,7 @@ duo_unix_duo_host:
 # pattern-lists may be negated by preceding them with an exclamation mark ("!").
 # For example, to specify Duo authentication for all users (except those that are
 # also admins), and for guests:
-dup_unix_groups:
+duo_unix_groups:
 
 # Include information such as the command to be executed in the Duo Push message.
 # Either "yes" or "no". The default is "no".
