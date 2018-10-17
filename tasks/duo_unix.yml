@@ -24,16 +24,12 @@
 
 - name: yum makecache
   shell: yum -q -y makecache fast warn=no
-  when: duo_unix_repository | changed
+  when: duo_unix_repository is changed
 
-- name: install Duo Security dependencies
-  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
-  with_items:
-    - ca-certificates
-    - duo_unix
-    - openssh-server
-    - pygpgme
-    - yum-utils
+- name: install packages
+  package:
+    name: ["ca-certificates", "duo_unix", "openssh-server", "pygpgme", "yum-utils"]
+    state: present
 
 - name: set duo configuration
   template: src=templates/pam_duo.conf.j2 dest=/etc/duo/pam_duo.conf owner=root group=root mode=0600
@@ -50,4 +46,4 @@
 
 - name: failed to start sshd
   fail: msg="failed to start sshd"
-  when: ((duo_unix_check_sshd|failed) and (duo_unix_role_debug|bool == false))
+  when: ((duo_unix_check_sshd is failed) and (duo_unix_role_debug|bool == false))
