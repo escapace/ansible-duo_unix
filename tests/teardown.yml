@@ -5,4 +5,4 @@
   roles:
     - role: provision_docker
       provision_docker_teardown: true
-      provision_docker_inventory_group: "{{ groups['test-images'] }}"
+      provision_docker_inventory_group: "{{ groups['test'] }}"

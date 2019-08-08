@@ -2,9 +2,9 @@
   hosts: localhost
   roles:
     - role: provision_docker
-      provision_docker_inventory_group: "{{ groups['test-images'] }}"
+      provision_docker_inventory_group: "{{ groups['test'] }}"
 
-- hosts: test-images
+- hosts: test
   vars:
     duo_unix_role_debug: true
     duo_unix_duo_ikey: integration-key
