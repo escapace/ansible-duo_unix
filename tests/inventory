@@ -1,3 +1,0 @@
-[test]
-centos image="escapace/test-centos:7"
-
