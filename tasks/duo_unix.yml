@@ -13,37 +13,36 @@
 - name: retrieving Duo Security gpg key
   rpm_key: state=present key=https://duo.com/DUO-GPG-PUBLIC-KEY.asc
 
-- name: add packagecloud repository
+- name: add duo repository
   template:
     src: templates/duosecurity.repo.j2
     dest: "/etc/yum.repos.d/duosecurity.repo"
     mode: 0644
     owner: root
     group: root
-  register: duo_unix_repository
+  # register: duo_unix_repository
 
-- name: yum makecache
-  shell: yum -q -y makecache fast warn=no
-  when: duo_unix_repository is changed
+# - name: yum makecache
+#   shell: yum -q -y makecache warn=no
+#   when: duo_unix_repository is changed
 
 - name: install packages
   package:
-    name: ["ca-certificates", "duo_unix", "openssh-server", "pygpgme", "yum-utils"]
+    name: ["ca-certificates", "duo_unix", "openssh-server"]
     state: present
 
 - name: set duo configuration
   template: src=templates/pam_duo.conf.j2 dest=/etc/duo/pam_duo.conf owner=root group=root mode=0600
+  notify:
+    - sshd restart
 
 - name: update pam.d configuration
   template: src=templates/sshd.j2 dest=/etc/pam.d/sshd owner=root group=root mode=0644
-
-- name: Ensure that sshd is running
-  service: name=sshd state=started enabled=yes
   notify:
     - sshd restart
-  ignore_errors: True
-  register: duo_unix_check_sshd
 
-- name: failed to start sshd
-  fail: msg="failed to start sshd"
-  when: ((duo_unix_check_sshd is failed) and (duo_unix_role_debug|bool == false))
+# - debug: msg="trigger sshd restart"
+#   notify:
+#     - sshd restart
+#   changed_when: true
+#   when: (not duo_unix_role_debug|bool)
