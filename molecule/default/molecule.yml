@@ -1,4 +1,5 @@
 ---
+prerun: false
 dependency:
   name: galaxy
 driver:
@@ -8,7 +9,7 @@ lint: |
     ansible-lint .
 platforms:
   - name: instance
-    image: escapace/test-centos:8
+    image: ghcr.io/escapace/ansible-test-containers
     command: /sbin/init
     tmpfs:
       - /run
