@@ -2,7 +2,9 @@
 - name: Converge
   hosts: all
   vars:
+    ssh_role_debug: true
     ferm_role_debug: true
+    duo_unix_role_debug: true
     duo_unix_duo_ikey: integration-key
     duo_unix_duo_skey: secret-key
     duo_unix_duo_host: api-xxxxxx.duosecurity.com

@@ -2,10 +2,10 @@
 ikey={{ duo_unix_duo_ikey }}
 skey={{ duo_unix_duo_skey }}
 host={{ duo_unix_duo_host }}
-pushinfo={{ duo_unix_duo_pushinfo }}
+pushinfo={{ duo_unix_duo_pushinfo | ternary("yes", "no") }}
 failmode={{ duo_unix_duo_failmode }}
 prompts={{ duo_unix_duo_prompts }}
-autopush={{ duo_unix_autopush }}
+autopush={{ duo_unix_autopush | ternary("yes", "no") }}
 {% if duo_unix_groups is defined and duo_unix_groups != "" %}
 groups={{ duo_unix_groups }}
 {% endif %}
