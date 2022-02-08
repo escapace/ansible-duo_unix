@@ -20,11 +20,6 @@
     mode: 0644
     owner: root
     group: root
-  # register: duo_unix_repository
-
-# - name: yum makecache
-#   shell: yum -q -y makecache warn=no
-#   when: duo_unix_repository is changed
 
 - name: install packages
   package:

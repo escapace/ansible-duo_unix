@@ -9,13 +9,13 @@ galaxy_info:
   min_ansible_version: 2.10
   github_branch: trunk
   platforms:
-  - name: EL
-    versions:
-    - 9
+    - name: EL
+      versions:
+        - 9
 
   galaxy_tags:
-  - escapace
-  - duo
+    - escapace
+    - duo
 
 dependencies:
-   - { role: escapace.ssh }
+  - { role: escapace.ssh }
