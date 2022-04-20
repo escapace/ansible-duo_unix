@@ -6,7 +6,7 @@
     ( vars[item] is defined and not vars[item] ) or
     ( vars[item] is defined and vars[item]|length == 0 )
   with_items: "{{ duo_unix_required }}"
-  fail:
+  ansible.builtin.fail:
     msg: >
       Required variables not defined or empty.
 
@@ -14,7 +14,7 @@
 #   ansible.builtin.rpm_key: state=present key=https://duo.com/DUO-GPG-PUBLIC-KEY.asc
 
 - name: add duo repository
-  template:
+  ansible.builtin.template:
     src: templates/duosecurity.repo.j2
     dest: "/etc/yum.repos.d/duosecurity.repo"
     mode: 0644
@@ -22,17 +22,17 @@
     group: root
 
 - name: install packages
-  package:
+  ansible.builtin.package:
     name: ["ca-certificates", "duo_unix", "openssh-server"]
     state: present
 
 - name: set duo configuration
-  template: src=templates/pam_duo.conf.j2 dest=/etc/duo/pam_duo.conf owner=root group=root mode=0600
+  ansible.builtin.template: src=templates/pam_duo.conf.j2 dest=/etc/duo/pam_duo.conf owner=root group=root mode=0600
   notify:
     - sshd restart
 
 - name: update pam.d configuration
-  template: src=templates/sshd.j2 dest=/etc/pam.d/sshd owner=root group=root mode=0644
+  ansible.builtin.template: src=templates/sshd.j2 dest=/etc/pam.d/sshd owner=root group=root mode=0644
   notify:
     - sshd restart
 

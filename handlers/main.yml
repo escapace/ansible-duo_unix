@@ -1,5 +1,5 @@
 ---
 
 - name: sshd restart
-  service: name=sshd state=restarted
+  ansible.builtin.service: name=sshd state=restarted
   when: not duo_unix_role_debug|bool
