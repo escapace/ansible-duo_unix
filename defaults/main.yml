@@ -46,3 +46,5 @@ duo_unix_duo_prompts: 3
 # authentication method.  When configured with autopush = yes, we recommend
 # setting prompts = 1.
 duo_unix_autopush: true
+
+duo_unix_role_debug: false
