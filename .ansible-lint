@@ -3,6 +3,9 @@
 skip_list:
   - command-instead-of-shell
   - experimental
+  - git-latest
   - ignore-errors
   - no-changed-when
+  - no-handler
+  - package-latest
   - schema
