@@ -1,17 +1,15 @@
 ---
-
 galaxy_info:
   role_name: duo_unix
   description: duo_unix role
   issue_tracker_url: https://github.com/escapace/ansible-duo_unix/issues
   license: Apache-2.0
   author: escapace
-  min_ansible_version: 2.10
-  github_branch: trunk
+  min_ansible_version: "2.13"
   platforms:
     - name: EL
       versions:
-        - 9
+        - "9"
 
   galaxy_tags:
     - escapace
