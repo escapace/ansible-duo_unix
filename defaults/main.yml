@@ -45,6 +45,6 @@ duo_unix_duo_prompts: 3
 # push is unavailable. If "no", the user will be prompted to choose an
 # authentication method.  When configured with autopush = yes, we recommend
 # setting prompts = 1.
-duo_unix_autopush: true
+duo_unix_autopush: false
 
 duo_unix_role_debug: false
