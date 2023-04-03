@@ -27,12 +27,22 @@
     state: present
 
 - name: set duo configuration
-  ansible.builtin.template: src=templates/pam_duo.conf.j2 dest=/etc/duo/pam_duo.conf owner=root group=root mode=0600
+  ansible.builtin.template:
+    src: templates/pam_duo.conf.j2
+    dest: /etc/duo/pam_duo.conf
+    owner: root
+    group: root
+    mode: 0600
   notify:
     - sshd restart
 
 - name: update pam.d configuration
-  ansible.builtin.template: src=templates/sshd.j2 dest=/etc/pam.d/sshd owner=root group=root mode=0644
+  ansible.builtin.template:
+    src: templates/sshd.j2
+    dest: /etc/pam.d/sshd
+    owner: root
+    group: root
+    mode: 0644
   notify:
     - sshd restart
 
