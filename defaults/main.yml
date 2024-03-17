@@ -2,13 +2,10 @@
 
 # Duo Security integration key
 duo_unix_duo_ikey:
-
 # Duo Security secret key
 duo_unix_duo_skey:
-
 # Duo Security API hostname (i.e. api-XXXXXXXX.duosecurity.com
 duo_unix_duo_host:
-
 # If specified, Duo authentication is required only for users whose primary group
 # or supplementary group list matches one of the space-separated pattern lists.
 #
@@ -21,7 +18,6 @@ duo_unix_duo_host:
 # For example, to specify Duo authentication for all users (except those that are
 # also admins), and for guests:
 duo_unix_groups:
-
 # Include information such as the command to be executed in the Duo Push message.
 # Either "yes" or "no". The default is "no".
 duo_unix_duo_pushinfo: true
