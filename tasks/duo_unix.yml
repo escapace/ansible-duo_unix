@@ -11,10 +11,9 @@
 
 - name: retrieving duo security gpg key
   ansible.builtin.rpm_key:
-
     state: present
     key: https://duo.com/DUO-GPG-PUBLIC-KEY.asc
-    cmd: ""
+
 - name: add duo repository
   ansible.builtin.template:
     src: templates/duosecurity.repo.j2
