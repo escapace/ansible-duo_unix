@@ -1,4 +1,3 @@
 ---
-
 - ansible.builtin.include_tasks: duo_unix.yml
   when: ansible_os_family == "RedHat"

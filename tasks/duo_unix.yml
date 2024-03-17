@@ -1,5 +1,4 @@
 ---
-
 - name: check for variables
   when: >
     (vars[item] is not defined) or
@@ -11,19 +10,22 @@
       Required variables not defined or empty.
 
 - name: retrieving duo security gpg key
-  ansible.builtin.rpm_key: state=present key=https://duo.com/DUO-GPG-PUBLIC-KEY.asc
+  ansible.builtin.rpm_key:
 
+    state: present
+    key: https://duo.com/DUO-GPG-PUBLIC-KEY.asc
+    cmd: ""
 - name: add duo repository
   ansible.builtin.template:
     src: templates/duosecurity.repo.j2
-    dest: "/etc/yum.repos.d/duosecurity.repo"
-    mode: 0644
+    dest: /etc/yum.repos.d/duosecurity.repo
+    mode: "0644"
     owner: root
     group: root
 
 - name: install packages
   ansible.builtin.package:
-    name: ["ca-certificates", "duo_unix", "openssh-server"]
+    name: [ca-certificates, duo_unix, openssh-server]
     state: present
 
 - name: set duo configuration
@@ -32,7 +34,7 @@
     dest: /etc/duo/pam_duo.conf
     owner: root
     group: root
-    mode: 0600
+    mode: "0600"
   notify:
     - sshd restart
 
@@ -42,7 +44,7 @@
     dest: /etc/pam.d/sshd
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - sshd restart
 

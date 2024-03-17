@@ -6,8 +6,8 @@ dependency:
 driver:
   name: docker
 lint: |
-    yamllint .
-    ansible-lint .
+  yamllint .
+  ansible-lint .
 platforms:
   - name: instance
     image: ghcr.io/escapace/ansible-test-containers
