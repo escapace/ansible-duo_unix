@@ -46,7 +46,6 @@
     mode: "0644"
   notify:
     - sshd restart
-
 # - debug: msg="trigger sshd restart"
 #   notify:
 #     - sshd restart
