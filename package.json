@@ -1,0 +1,36 @@
+{
+  "name": "@escapace/ansible-duo_unix",
+  "version": "0.0.0",
+  "author": {
+    "name": "escapace",
+    "email": "opensource@escapace.com"
+  },
+  "bugs": "https://github.com/escapace/ansible-duo_unix/issues",
+  "devDependencies": {
+    "@commitlint/cli": "19.4.1",
+    "@commitlint/config-conventional": "19.4.1",
+    "@ls-lint/ls-lint": "2.2.3",
+    "eslint": "9.10.0",
+    "eslint-config-escapace": "5.2.1",
+    "lefthook": "1.7.15",
+    "prettier": "3.3.3",
+    "prettier-config-escapace": "1.2.1",
+    "syncpack": "13.0.0"
+  },
+  "engines": {
+    "pnpm": ">=9.4.0"
+  },
+  "homepage": "https://github.com/escapace/ansible-duo_unix#readme",
+  "license": "Apache-2.0",
+  "private": true,
+  "repository": "escapace/ansible-duo_unix",
+  "scripts": {
+    "format": "syncpack format && eslint --no-warn-ignored --fix && prettier -uw .",
+    "lint": "ls-lint --config .ls-lint.yaml && eslint",
+    "ls-lint": "ls-lint --config .ls-lint.yaml",
+    "prepare": "lefthook install",
+    "syncpack": "syncpack fix-mismatches && syncpack-set-semver-ranges && syncpack format"
+  },
+  "sideEffects": false,
+  "type": "module"
+}

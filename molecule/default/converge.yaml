@@ -10,4 +10,4 @@
     duo_unix_duo_host: api-xxxxxx.duosecurity.com
     dup_unix_groups: integration
   roles:
-    - role: escapace.duo_unix
+    - role: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | basename }}"

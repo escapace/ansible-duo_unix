@@ -5,8 +5,9 @@ skip_list:
   - experimental
   - git-latest
   - ignore-errors
+  - name
   - no-changed-when
   - no-handler
   - package-latest
   - schema
-  - name
+  - yaml

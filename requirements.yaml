@@ -1,0 +1,7 @@
+---
+collections: []
+
+roles:
+  - name: escapace.ssh
+    src: https://github.com/escapace/ansible-ssh
+    version: origin/trunk

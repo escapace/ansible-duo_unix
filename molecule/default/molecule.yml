@@ -1,15 +1,17 @@
 ---
 prerun: false
 dependency:
-  name: galaxy
+  name: shell
+  command: >
+    ansible-galaxy install -fr
+    ${MOLECULE_SCENARIO_DIRECTORY}/../../requirements.yaml
 driver:
   name: docker
-lint: |
-  yamllint .
-  ansible-lint .
 platforms:
   - name: instance
     image: ghcr.io/escapace/ansible-test-containers
     pre_build_image: true
 provisioner:
   name: ansible
+  playbooks:
+    converge: '${CONVERGE_PLAYBOOK:-converge.yaml}'
