@@ -1,5 +1,5 @@
 #%PAM-1.0
-#auth       substack     password-auth
+auth       required     pam_sepermit.so
 auth       required     pam_env.so
 auth       sufficient   pam_duo.so
 auth       required     pam_deny.so
@@ -18,4 +18,3 @@ session    optional     pam_keyinit.so force revoke
 session    optional     pam_motd.so
 session    include      password-auth
 session    include      postlogin
-

@@ -9,18 +9,18 @@
     msg: >
       Required variables not defined or empty.
 
-- name: retrieving duo security gpg key
-  ansible.builtin.rpm_key:
-    state: present
-    key: https://duo.com/DUO-GPG-PUBLIC-KEY.asc
-
-- name: add duo repository
-  ansible.builtin.template:
-    src: templates/duosecurity.repo.j2
-    dest: /etc/yum.repos.d/duosecurity.repo
-    mode: '0644'
-    owner: root
-    group: root
+# - name: retrieving duo security gpg key
+#   ansible.builtin.rpm_key:
+#     state: present
+#     key: https://duo.com/DUO-GPG-PUBLIC-KEY.asc
+#
+# - name: add duo repository
+#   ansible.builtin.template:
+#     src: templates/duosecurity.repo.j2
+#     dest: /etc/yum.repos.d/duosecurity.repo
+#     mode: '0644'
+#     owner: root
+#     group: root
 
 - name: install packages
   ansible.builtin.package:
