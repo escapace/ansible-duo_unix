@@ -10,4 +10,6 @@ skip_list:
   - no-handler
   - package-latest
   - schema
-  - yaml
+  - yaml[trailing-spaces]
+  - yaml[indentation]
+  - yaml[line-length]

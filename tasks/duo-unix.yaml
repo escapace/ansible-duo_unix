@@ -4,7 +4,7 @@
     (vars[item] is not defined) or
     ( vars[item] is defined and not vars[item] ) or
     ( vars[item] is defined and vars[item]|length == 0 )
-  with_items: '{{ duo_unix_required }}'
+  with_items: "{{ duo_unix_required }}"
   ansible.builtin.fail:
     msg: >
       Required variables not defined or empty.
@@ -33,7 +33,7 @@
     dest: /etc/duo/pam_duo.conf
     owner: root
     group: root
-    mode: '0600'
+    mode: "0600"
   notify:
     - sshd restart
 
@@ -43,7 +43,7 @@
     dest: /etc/pam.d/sshd
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   notify:
     - sshd restart
 # - debug: msg="trigger sshd restart"

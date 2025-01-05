@@ -14,4 +14,4 @@ platforms:
 provisioner:
   name: ansible
   playbooks:
-    converge: '${CONVERGE_PLAYBOOK:-converge.yaml}'
+    converge: "${CONVERGE_PLAYBOOK:-converge.yaml}"
