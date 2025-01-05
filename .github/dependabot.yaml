@@ -1,0 +1,18 @@
+version: 2
+
+updates:
+  - directory: '/'
+    groups:
+      actions:
+        update-types:
+          - 'minor'
+          - 'patch'
+    labels:
+      - 'dependencies'
+      - 'github-actions'
+    package-ecosystem: 'github-actions'
+    schedule:
+      day: saturday
+      interval: weekly
+      time: '07:00'
+      timezone: Etc/UTC
