@@ -16,8 +16,10 @@ on:
 
 permissions:
   contents: read
-  packages: read
 
 jobs:
-  ci:
+  continuous-integration:
+    permissions:
+      contents: read
+      packages: read
     uses: escapace/workflows/.github/workflows/ci-ansible-role.yaml@trunk

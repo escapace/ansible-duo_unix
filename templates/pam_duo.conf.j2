@@ -6,6 +6,6 @@ pushinfo={{ duo_unix_duo_pushinfo | ternary("yes", "no") }}
 failmode={{ duo_unix_duo_failmode }}
 prompts={{ duo_unix_duo_prompts }}
 autopush={{ duo_unix_autopush | ternary("yes", "no") }}
-{% if duo_unix_groups is defined and duo_unix_groups != "" %}
+{% if duo_unix_groups | length > 0 %}
 groups={{ duo_unix_groups }}
 {% endif %}

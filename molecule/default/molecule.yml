@@ -1,17 +1,32 @@
 ---
 prerun: false
+ansible:
+  cfg:
+    defaults:
+      home: "${MOLECULE_PROJECT_DIRECTORY}/.ansible"
+      inject_facts_as_vars: false
+      roles_path: >-
+        ${MOLECULE_PROJECT_DIRECTORY}/..:${MOLECULE_PROJECT_DIRECTORY}/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
 dependency:
   name: shell
   command: >
-    ansible-galaxy install -fr
+    test -f ${MOLECULE_SCENARIO_DIRECTORY}/../../requirements.yaml
+    &&
+    ansible-galaxy role install -fr
     ${MOLECULE_SCENARIO_DIRECTORY}/../../requirements.yaml
+    &&
+    ansible-galaxy collection install -r
+    ${MOLECULE_SCENARIO_DIRECTORY}/../../requirements.yaml
+    ||
+    test ! -f ${MOLECULE_SCENARIO_DIRECTORY}/../../requirements.yaml
 driver:
   name: docker
 platforms:
   - name: instance
-    image: ghcr.io/escapace/ansible-test-containers
+    image: quay.io/centos/centos:stream10
     pre_build_image: true
 provisioner:
   name: ansible
   playbooks:
     converge: "${CONVERGE_PLAYBOOK:-converge.yaml}"
+    verify: verify.yaml

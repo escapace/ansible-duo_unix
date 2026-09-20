@@ -1,0 +1,36 @@
+allowBuilds:
+  lefthook: true
+blockExoticSubdeps: true
+childConcurrency: 1
+dedupePeers: true
+loglevel: warn
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - '@caslon/*'
+  - '@cassiopeia/*'
+  - '@cepheus/*'
+  - '@escapace/*'
+  - '@pangram/*'
+  - '@pointe/*'
+  - caslon
+  - cassiopeia
+  - cepheus
+  - coastal
+  - eslint-config-escapace
+  - esroll
+  - fastify-fetch
+  - pointe
+  - prettier-config-escapace
+  - seedpods
+  - snaproll
+minimumReleaseAgeExcludePrune: true
+minimumReleaseAgeStrict: true
+strictDepBuilds: true
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  - '@eslint/*'
+  - eslint
+  - tinyexec@1.2.1
+  - tinyexec@1.2.2
+  - ts-api-utils@2.3.0
+verifyDepsBeforeRun: false

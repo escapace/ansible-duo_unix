@@ -1,13 +1,29 @@
 ---
-- name: Converge
+- name: converge
   hosts: all
   vars:
-    ssh_role_debug: true
-    ferm_role_debug: true
-    duo_unix_role_debug: true
     duo_unix_duo_ikey: integration-key
     duo_unix_duo_skey: secret-key
     duo_unix_duo_host: api-xxxxxx.duosecurity.com
-    dup_unix_groups: integration
+    duo_unix_groups: keyboard-interactive
   roles:
     - role: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | basename }}"
+  post_tasks:
+    - name: create molecule duo test user
+      ansible.builtin.user:
+        name: molecule-duo
+        groups:
+          - keyboard-interactive
+        append: true
+        create_home: false
+        system: true
+
+    - name: create molecule ssh host keys
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/ssh-keygen
+          - -A
+      register: molecule_ssh_host_keys
+      changed_when: >-
+        molecule_ssh_host_keys.stdout | length > 0
+        or molecule_ssh_host_keys.stderr | length > 0

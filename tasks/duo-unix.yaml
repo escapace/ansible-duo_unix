@@ -1,53 +1,131 @@
 ---
-- name: check for variables
-  when: >
-    (vars[item] is not defined) or
-    ( vars[item] is defined and not vars[item] ) or
-    ( vars[item] is defined and vars[item]|length == 0 )
-  with_items: "{{ duo_unix_required }}"
-  ansible.builtin.fail:
-    msg: >
-      Required variables not defined or empty.
+- name: validate the duo_unix platform
+  ansible.builtin.assert:
+    that:
+      - ansible_facts["distribution"] in duo_unix_repository_paths
+      - ansible_facts["distribution_major_version"] in duo_unix_supported_major_versions
+    fail_msg: >-
+      duo_unix supports CentOS Stream and Red Hat Enterprise Linux versions 9
+      and 10; this host is {{ ansible_facts["distribution"] }}
+      {{ ansible_facts["distribution_version"] }}.
+    quiet: true
 
-# - name: retrieving duo security gpg key
-#   ansible.builtin.rpm_key:
-#     state: present
-#     key: https://duo.com/DUO-GPG-PUBLIC-KEY.asc
-#
-# - name: add duo repository
-#   ansible.builtin.template:
-#     src: templates/duosecurity.repo.j2
-#     dest: /etc/yum.repos.d/duosecurity.repo
-#     mode: '0644'
-#     owner: root
-#     group: root
+- name: validate the duo_unix configuration
+  ansible.builtin.assert:
+    that:
+      - duo_unix_duo_ikey is string
+      - duo_unix_duo_ikey | length > 0
+      - duo_unix_duo_skey is string
+      - duo_unix_duo_skey | length > 0
+      - duo_unix_duo_host is string
+      - duo_unix_duo_host is match('^[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?$')
+      - duo_unix_duo_pushinfo is boolean
+      - duo_unix_duo_failmode in ['safe', 'secure']
+      - duo_unix_duo_prompts is integer
+      - duo_unix_duo_prompts in [1, 2, 3]
+      - duo_unix_autopush is boolean
+      - duo_unix_groups is string
+      - >-
+        (duo_unix_groups | length == 0)
+        or (duo_unix_groups is search('(^|[ ,])[^! ,]'))
+    fail_msg: >-
+      The duo_unix configuration is invalid. Provide non-empty string
+      credentials, a hostname, supported boolean and enumerated options, and a
+      groups expression containing a positive pattern when groups is non-empty.
+    quiet: true
 
-- name: install packages
-  ansible.builtin.package:
-    name: [ca-certificates, duo_unix, openssh-server]
+- name: install duo_unix package prerequisites
+  ansible.builtin.dnf:
+    name:
+      - ca-certificates
+      - policycoreutils
+      - selinux-policy-targeted
     state: present
 
-- name: set duo configuration
+- name: import the duo_unix repository signing key
+  ansible.builtin.rpm_key:
+    key: "{{ duo_unix_repository_key_url }}"
+    fingerprint: "{{ duo_unix_repository_key_fingerprints }}"
+    state: present
+
+- name: configure the duo_unix repository
+  ansible.builtin.yum_repository:
+    name: duosecurity
+    description: Duo Security Repository
+    baseurl: >-
+      https://pkg.duosecurity.com/{{ duo_unix_repository_paths[ansible_facts["distribution"]] }}/$releasever/$basearch
+    enabled: true
+    gpgcheck: true
+    gpgkey: "{{ duo_unix_repository_key_url }}"
+    mode: "0644"
+
+- name: install duo_unix
+  ansible.builtin.dnf:
+    name: duo_unix
+    state: present
+  register: duo_unix_package
+
+- name: inspect installed selinux policy modules for duo_unix
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/semodule
+      - --list-modules=full
+  changed_when: false
+  register: duo_unix_selinux_modules
+
+- name: install the duo_unix selinux policy module
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/semodule
+      - --install
+      - /usr/share/selinux/packages/authlogin_duo.pp.bz2
+  when: >-
+    duo_unix_package.changed
+    or (
+      duo_unix_selinux_modules.stdout_lines
+      | select('match', '^[0-9]+[ ]+authlogin_duo[ ]+')
+      | list
+      | length == 0
+    )
+  changed_when: true
+
+- name: verify the duo_unix selinux policy module
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/semodule
+      - --list-modules=full
+  changed_when: false
+  register: duo_unix_verified_selinux_modules
+
+- name: validate the duo_unix selinux policy module
+  ansible.builtin.assert:
+    that:
+      - >-
+        duo_unix_verified_selinux_modules.stdout_lines
+        | select('match', '^[0-9]+[ ]+authlogin_duo[ ]+')
+        | list
+        | length == 1
+    fail_msg: >-
+      The authlogin_duo SELinux policy module was not installed.
+    quiet: true
+
+- name: configure duo_unix
   ansible.builtin.template:
-    src: templates/pam_duo.conf.j2
+    src: pam_duo.conf.j2
     dest: /etc/duo/pam_duo.conf
     owner: root
     group: root
     mode: "0600"
+  diff: false
   notify:
-    - sshd restart
+    - ssh restart sshd
 
-- name: update pam.d configuration
+- name: configure ssh pam for duo_unix
   ansible.builtin.template:
-    src: templates/sshd.j2
+    src: sshd.j2
     dest: /etc/pam.d/sshd
     owner: root
     group: root
     mode: "0644"
   notify:
-    - sshd restart
-# - debug: msg="trigger sshd restart"
-#   notify:
-#     - sshd restart
-#   changed_when: true
-#   when: (not duo_unix_role_debug|bool)
+    - ssh restart sshd

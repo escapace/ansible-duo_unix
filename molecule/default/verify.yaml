@@ -1,0 +1,92 @@
+---
+- name: verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: gather installed package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: inspect duo_unix managed files
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - /etc/yum.repos.d/duosecurity.repo
+        - /etc/duo/pam_duo.conf
+        - /etc/pam.d/sshd
+        - /lib64/security/pam_duo.so
+        - /etc/systemd/system/multi-user.target.wants/sshd.service
+      register: duo_unix_managed_files
+
+    - name: read duo_unix configuration
+      ansible.builtin.slurp:
+        src: /etc/duo/pam_duo.conf
+      register: duo_unix_configuration
+
+    - name: read ssh pam configuration
+      ansible.builtin.slurp:
+        src: /etc/pam.d/sshd
+      register: duo_unix_ssh_pam_configuration
+
+    - name: inspect duo_unix selinux policy modules
+      ansible.builtin.command:
+        argv:
+          - /usr/sbin/semodule
+          - --list-modules=full
+      changed_when: false
+      register: duo_unix_selinux_modules
+
+    - name: inspect imported rpm signing keys
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/rpm
+          - --query
+          - --all
+          - --queryformat
+          - "%{NAME}-%{VERSION}-%{RELEASE}\n"
+          - gpg-pubkey
+      changed_when: false
+      register: duo_unix_rpm_signing_keys
+
+    - name: inspect non-duo ssh authentication
+      ansible.builtin.command:
+        argv:
+          - /usr/sbin/sshd
+          - -T
+          - -C
+          - user=root,host=example.test,addr=192.0.2.1
+      changed_when: false
+      register: duo_unix_non_duo_ssh_configuration
+
+    - name: inspect duo ssh authentication
+      ansible.builtin.command:
+        argv:
+          - /usr/sbin/sshd
+          - -T
+          - -C
+          - user=molecule-duo,host=example.test,addr=192.0.2.1
+      changed_when: false
+      register: duo_unix_duo_ssh_configuration
+
+    - name: validate duo_unix installation and ssh integration
+      ansible.builtin.assert:
+        that:
+          - "'duo_unix' in ansible_facts.packages"
+          - duo_unix_managed_files.results | map(attribute='stat.exists') | min
+          - duo_unix_managed_files.results[1].stat.mode == '0600'
+          - duo_unix_managed_files.results[1].stat.pw_name == 'root'
+          - duo_unix_managed_files.results[1].stat.gr_name == 'root'
+          - "'ff696172' in duo_unix_rpm_signing_keys.stdout"
+          - >-
+            duo_unix_selinux_modules.stdout_lines
+            | select('match', '^[0-9]+[ ]+authlogin_duo[ ]+')
+            | list
+            | length == 1
+          - "'groups=keyboard-interactive' in (duo_unix_configuration.content | b64decode)"
+          - "'failmode=secure' in (duo_unix_configuration.content | b64decode)"
+          - "'auth       sufficient   pam_duo.so' in (duo_unix_ssh_pam_configuration.content | b64decode)"
+          - "'authenticationmethods publickey' in duo_unix_non_duo_ssh_configuration.stdout_lines"
+          - "'kbdinteractiveauthentication no' in duo_unix_non_duo_ssh_configuration.stdout_lines"
+          - "'authenticationmethods publickey,keyboard-interactive:pam' in duo_unix_duo_ssh_configuration.stdout_lines"
+          - "'kbdinteractiveauthentication yes' in duo_unix_duo_ssh_configuration.stdout_lines"
+        quiet: true

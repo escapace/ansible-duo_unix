@@ -5,11 +5,12 @@ skip_list:
   - experimental
   - git-latest
   - ignore-errors
+  - key-order
   - name
   - no-changed-when
   - no-handler
   - package-latest
   - schema
-  - yaml[trailing-spaces]
   - yaml[indentation]
   - yaml[line-length]
+  - yaml[trailing-spaces]

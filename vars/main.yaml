@@ -1,5 +1,12 @@
 ---
-duo_unix_required:
-  - duo_unix_duo_ikey
-  - duo_unix_duo_skey
-  - duo_unix_duo_host
+duo_unix_repository_paths:
+  CentOS: CentOSStream
+  RedHat: RedHat
+
+duo_unix_supported_major_versions:
+  - "9"
+  - "10"
+
+duo_unix_repository_key_url: https://duo.com/DUO-GPG-PUBLIC-KEY.asc
+duo_unix_repository_key_fingerprints:
+  - D8EC4E2058401AE5578C4B3F4B44CE3DFF696172
