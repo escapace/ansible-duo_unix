@@ -1,0 +1,41 @@
+---
+- name: validate the duo_unix platform
+  ansible.builtin.assert:
+    that:
+      - ansible_facts["distribution"] in duo_unix_repository_paths
+      - ansible_facts["distribution_major_version"] in duo_unix_supported_major_versions
+    fail_msg: >-
+      duo_unix supports CentOS Stream and Red Hat Enterprise Linux versions 9
+      and 10; this host is {{ ansible_facts["distribution"] }}
+      {{ ansible_facts["distribution_version"] }}.
+    quiet: true
+
+- name: validate the duo_unix configuration
+  ansible.builtin.assert:
+    that:
+      - duo_unix_duo_ikey is string
+      - duo_unix_duo_ikey | length > 0
+      - duo_unix_duo_ikey is not search('[\r\n]')
+      - duo_unix_duo_skey is string
+      - duo_unix_duo_skey | length > 0
+      - duo_unix_duo_skey is not search('[\r\n]')
+      - duo_unix_duo_host is string
+      - duo_unix_duo_host is not search('[\r\n]')
+      - duo_unix_duo_host is match('^[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?$')
+      - duo_unix_duo_pushinfo is boolean
+      - duo_unix_duo_failmode in ['safe', 'secure']
+      - duo_unix_duo_prompts is integer
+      - duo_unix_duo_prompts in [1, 2, 3]
+      - duo_unix_autopush is boolean
+      - duo_unix_groups is string
+      - duo_unix_groups is not search('[\r\n]')
+      - >-
+        (duo_unix_groups | length == 0)
+        or (duo_unix_groups is search('(^|[ ,])[^! ,]'))
+    fail_msg: >-
+      The duo_unix configuration is invalid. Provide non-empty string
+      credentials, a hostname, supported boolean and enumerated options, and a
+      single-line groups expression containing a positive pattern when groups
+      is non-empty. Credentials must not contain line breaks.
+    quiet: true
+  no_log: true

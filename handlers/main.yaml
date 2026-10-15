@@ -1,0 +1,32 @@
+---
+- name: duo_unix gather selinux state before policy reload
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - "!min"
+      - selinux
+  listen: duo_unix reload selinux policy
+
+- name: duo_unix reload active selinux policy
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/semodule
+      - --reload
+  changed_when: true
+  when:
+    - not ansible_check_mode
+    - ansible_facts.get("selinux", {}).get("status") == "enabled"
+  listen: duo_unix reload selinux policy
+
+- name: duo_unix gather service facts before restart
+  ansible.builtin.service_facts:
+  listen: duo_unix restart sshd
+
+- name: duo_unix restart active sshd
+  ansible.builtin.systemd_service:
+    name: sshd.service
+    state: restarted
+  when:
+    - not ansible_check_mode
+    - (ansible_facts.services | default({})).get("sshd.service", {}).get("state") == "running"
+  listen: duo_unix restart sshd

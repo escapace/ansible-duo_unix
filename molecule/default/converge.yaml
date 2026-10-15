@@ -6,6 +6,11 @@
     duo_unix_duo_skey: secret-key
     duo_unix_duo_host: api-xxxxxx.duosecurity.com
     duo_unix_groups: keyboard-interactive
+  pre_tasks:
+    - name: install systemd for role testing
+      ansible.builtin.package:
+        name: systemd
+        state: present
   roles:
     - role: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | basename }}"
   post_tasks:

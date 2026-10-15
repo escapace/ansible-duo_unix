@@ -1,0 +1,48 @@
+---
+argument_specs:
+  main:
+    short_description: install and configure Duo Unix for SSH authentication
+    options:
+      duo_unix_duo_ikey:
+        type: str
+        required: true
+        no_log: true
+        description: Non-empty, single-line Duo integration key.
+      duo_unix_duo_skey:
+        type: str
+        required: true
+        no_log: true
+        description: Non-empty, single-line Duo secret key.
+      duo_unix_duo_host:
+        type: str
+        required: true
+        description: Duo API hostname, without a scheme or path.
+      duo_unix_groups:
+        type: str
+        default: ""
+        description:
+          - A single-line string of space-separated lists of comma-separated group patterns.
+          - Empty means all users reaching Duo PAM; non-empty expressions require a positive pattern.
+      duo_unix_duo_pushinfo:
+        type: bool
+        default: true
+        description: Include command information in Duo Push messages.
+      duo_unix_duo_failmode:
+        type: str
+        default: secure
+        choices:
+          - safe
+          - secure
+        description: Allow access on Duo service errors with safe, or deny access with secure.
+      duo_unix_duo_prompts:
+        type: int
+        default: 3
+        choices:
+          - 1
+          - 2
+          - 3
+        description: Maximum number of second-factor authentication prompts.
+      duo_unix_autopush:
+        type: bool
+        default: false
+        description: Automatically send a push request, falling back to a phone call.

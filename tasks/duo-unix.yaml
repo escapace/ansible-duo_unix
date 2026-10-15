@@ -1,38 +1,6 @@
 ---
-- name: validate the duo_unix platform
-  ansible.builtin.assert:
-    that:
-      - ansible_facts["distribution"] in duo_unix_repository_paths
-      - ansible_facts["distribution_major_version"] in duo_unix_supported_major_versions
-    fail_msg: >-
-      duo_unix supports CentOS Stream and Red Hat Enterprise Linux versions 9
-      and 10; this host is {{ ansible_facts["distribution"] }}
-      {{ ansible_facts["distribution_version"] }}.
-    quiet: true
-
-- name: validate the duo_unix configuration
-  ansible.builtin.assert:
-    that:
-      - duo_unix_duo_ikey is string
-      - duo_unix_duo_ikey | length > 0
-      - duo_unix_duo_skey is string
-      - duo_unix_duo_skey | length > 0
-      - duo_unix_duo_host is string
-      - duo_unix_duo_host is match('^[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?$')
-      - duo_unix_duo_pushinfo is boolean
-      - duo_unix_duo_failmode in ['safe', 'secure']
-      - duo_unix_duo_prompts is integer
-      - duo_unix_duo_prompts in [1, 2, 3]
-      - duo_unix_autopush is boolean
-      - duo_unix_groups is string
-      - >-
-        (duo_unix_groups | length == 0)
-        or (duo_unix_groups is search('(^|[ ,])[^! ,]'))
-    fail_msg: >-
-      The duo_unix configuration is invalid. Provide non-empty string
-      credentials, a hostname, supported boolean and enumerated options, and a
-      groups expression containing a positive pattern when groups is non-empty.
-    quiet: true
+- name: validate duo_unix inputs
+  ansible.builtin.import_tasks: validate.yaml
 
 - name: install duo_unix package prerequisites
   ansible.builtin.dnf:
@@ -65,6 +33,11 @@
     state: present
   register: duo_unix_package
 
+- name: inspect the selinux policy management tool
+  ansible.builtin.stat:
+    path: /usr/sbin/semodule
+  register: duo_unix_semodule
+
 - name: inspect installed selinux policy modules for duo_unix
   ansible.builtin.command:
     argv:
@@ -72,22 +45,29 @@
       - --list-modules=full
   changed_when: false
   register: duo_unix_selinux_modules
+  check_mode: false
+  when: duo_unix_semodule.stat.executable | default(false)
 
 - name: install the duo_unix selinux policy module
   ansible.builtin.command:
     argv:
       - /usr/sbin/semodule
+      - --noreload
       - --install
       - /usr/share/selinux/packages/authlogin_duo.pp.bz2
-  when: >-
-    duo_unix_package.changed
-    or (
-      duo_unix_selinux_modules.stdout_lines
-      | select('match', '^[0-9]+[ ]+authlogin_duo[ ]+')
-      | list
-      | length == 0
-    )
+  when:
+    - not ansible_check_mode
+    - >-
+      duo_unix_package.changed
+      or (
+        duo_unix_selinux_modules.stdout_lines
+        | select('match', '^[0-9]+[ ]+authlogin_duo[ ]+')
+        | list
+        | length == 0
+      )
   changed_when: true
+  notify:
+    - duo_unix reload selinux policy
 
 - name: verify the duo_unix selinux policy module
   ansible.builtin.command:
@@ -96,6 +76,8 @@
       - --list-modules=full
   changed_when: false
   register: duo_unix_verified_selinux_modules
+  check_mode: false
+  when: duo_unix_semodule.stat.executable | default(false)
 
 - name: validate the duo_unix selinux policy module
   ansible.builtin.assert:
@@ -108,6 +90,7 @@
     fail_msg: >-
       The authlogin_duo SELinux policy module was not installed.
     quiet: true
+  when: not ansible_check_mode
 
 - name: configure duo_unix
   ansible.builtin.template:
@@ -117,8 +100,9 @@
     group: root
     mode: "0600"
   diff: false
+  no_log: true
   notify:
-    - ssh restart sshd
+    - duo_unix restart sshd
 
 - name: configure ssh pam for duo_unix
   ansible.builtin.template:
@@ -128,4 +112,4 @@
     group: root
     mode: "0644"
   notify:
-    - ssh restart sshd
+    - duo_unix restart sshd

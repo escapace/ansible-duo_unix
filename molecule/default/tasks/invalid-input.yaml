@@ -1,0 +1,25 @@
+---
+- name: reject invalid duo_unix input
+  block:
+    - name: run duo_unix input validation
+      ansible.builtin.include_tasks:
+        file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/tasks/validate.yaml"
+      vars:
+        duo_unix_duo_ikey: "{{ duo_unix_test_input.get('ikey', 'integration-key') }}"
+        duo_unix_duo_skey: "{{ duo_unix_test_input.get('skey', 'secret-key') }}"
+        duo_unix_duo_host: "{{ duo_unix_test_input.get('host', 'api-example.duosecurity.com') }}"
+        duo_unix_groups: "{{ duo_unix_test_input.get('groups', '') }}"
+        duo_unix_duo_pushinfo: "{{ duo_unix_test_input.get('pushinfo', true) }}"
+        duo_unix_duo_failmode: "{{ duo_unix_test_input.get('failmode', 'secure') }}"
+        duo_unix_duo_prompts: "{{ duo_unix_test_input.get('prompts', 3) }}"
+        duo_unix_autopush: "{{ duo_unix_test_input.get('autopush', false) }}"
+
+    - name: fail when invalid duo_unix input is accepted
+      ansible.builtin.fail:
+        msg: duo_unix accepted invalid input
+  rescue:
+    - name: verify the configuration assertion rejected the input
+      ansible.builtin.assert:
+        that:
+          - ansible_failed_task.name == 'validate the duo_unix configuration'
+        quiet: true

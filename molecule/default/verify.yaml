@@ -1,8 +1,47 @@
 ---
 - name: verify
   hosts: all
-  gather_facts: false
+  gather_facts: true
+  vars_files:
+    - "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/vars/main.yaml"
   tasks:
+    - name: verify invalid duo_unix inputs
+      ansible.builtin.include_tasks: tasks/invalid-input.yaml
+      loop:
+        - { ikey: "" }
+        - { ikey: "key\r\nfailmode=safe" }
+        - { skey: null }
+        - { skey: "secret\nfailmode=safe" }
+        - { host: "https://api-example.duosecurity.com" }
+        - { host: "api-example.duosecurity.com\n" }
+        - { groups: "!admins" }
+        - { groups: "admins\nfailmode=safe" }
+        - { pushinfo: "true" }
+        - { failmode: "allow" }
+        - { prompts: 0 }
+        - { prompts: 4 }
+        - { prompts: "2" }
+        - { autopush: null }
+      loop_control:
+        loop_var: duo_unix_test_input
+
+    - name: verify valid duo_unix prompt boundaries and group expressions
+      ansible.builtin.include_tasks:
+        file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/tasks/validate.yaml"
+      vars:
+        duo_unix_duo_ikey: integration-key
+        duo_unix_duo_skey: secret-key
+        duo_unix_duo_host: api-example.duosecurity.com
+        duo_unix_groups: "{{ item.groups }}"
+        duo_unix_duo_pushinfo: false
+        duo_unix_duo_failmode: safe
+        duo_unix_duo_prompts: "{{ item.prompts }}"
+        duo_unix_autopush: true
+      loop:
+        - { prompts: 1, groups: "" }
+        - { prompts: 2, groups: "*,!admins guests" }
+        - { prompts: 3, groups: keyboard-interactive }
+
     - name: gather installed package facts
       ansible.builtin.package_facts:
         manager: auto
@@ -68,10 +107,14 @@
       changed_when: false
       register: duo_unix_duo_ssh_configuration
 
+    - name: gather service facts after image convergence
+      ansible.builtin.service_facts:
+
     - name: validate duo_unix installation and ssh integration
       ansible.builtin.assert:
         that:
           - "'duo_unix' in ansible_facts.packages"
+          - (ansible_facts.services | default({})).get("sshd.service", {}).get("state") != "running"
           - duo_unix_managed_files.results | map(attribute='stat.exists') | min
           - duo_unix_managed_files.results[1].stat.mode == '0600'
           - duo_unix_managed_files.results[1].stat.pw_name == 'root'
